@@ -1,5 +1,6 @@
 package com.api.users.dto;
 
+import com.api.enums.EnumUsersType;
 import com.api.users.UserModel;
 
 import lombok.*;
@@ -21,5 +22,12 @@ public class UserResponseDTO {
         this.email = user.getEmail();
         this.taxId = user.getTaxId();
         this.type = user.getEnumUsersType();
+    }
+
+    public UserResponseDTO(String fullName, String email, String taxId, EnumUsersType enumUsersType) {
+        this.fullName = fullName;
+        this.email = email;
+        this.taxId = taxId;
+        this.type = enumUsersType.name();
     }
 }

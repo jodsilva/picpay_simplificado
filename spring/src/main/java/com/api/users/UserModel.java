@@ -5,6 +5,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 import com.api.users.dto.UserCreateRequestDTO;
+import com.api.users.dto.UserUpdateRequestDTO;
 
 @Entity
 @Table(name = "users")
@@ -22,7 +23,7 @@ public class UserModel {
     private String fullName;
     @Column(nullable = false, unique = true)
     private String email;
-    @Column(name = "tax_id", nullable = false,unique = true)
+    @Column(name = "tax_id", nullable = false, unique = true)
     private String taxId;
     @Column(name="enum_users_type", nullable = false)
     private String enumUsersType;
@@ -40,6 +41,14 @@ public class UserModel {
         this.email = userDTO.getEmail();
         this.taxId = userDTO.getTaxId();
         this.enumUsersType = userDTO.getType();
+        this.password = userDTO.getPassword();
+    }
+
+    public void applyUpdateDTO(UserUpdateRequestDTO userDTO){
+        userDTO.getFullName().ifPresent(value -> this.fullName = value);
+        userDTO.getEmail().ifPresent(value -> this.email = value);
+        userDTO.getTaxId().ifPresent(value -> this.taxId = value);
+        userDTO.getType().ifPresent(value -> this.enumUsersType = value);
     }
 
     @PrePersist
