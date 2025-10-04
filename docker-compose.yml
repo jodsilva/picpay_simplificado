@@ -1,0 +1,52 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+    ports:
+      - "${DB_PORT}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  spring:
+    build:
+      context: ./spring
+      dockerfile: Dockerfile
+    container_name: spring-api
+    volumes:
+      - ./spring:/app
+      - ~/.m2:/root/.m2
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:${DB_PORT}/${DB_DATABASE}
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${DB_ROOT_PASSWORD}
+    ports:
+      - "${SPRING_PORT}:8080"
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+
+  vue:
+    build:
+      context: ./vue
+      dockerfile: Dockerfile
+    container_name: vue
+    volumes:
+      - ./vue:/app
+      - /app/node_modules
+    ports:
+      - "${NODE_PORT}:5173"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+
+volumes:
+  mysql_data:
