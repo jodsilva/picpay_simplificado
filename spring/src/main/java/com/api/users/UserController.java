@@ -1,6 +1,7 @@
 package com.api.users;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,9 @@ import org.springframework.web.bind.annotation.*;
 import com.api.users.dto.UserCreateRequestDTO;
 import com.api.users.dto.UserFilterRequestDTO;
 import com.api.users.dto.UserUpdateRequestDTO;
+
+import jakarta.validation.Valid;
+
 import com.api.users.dto.UserResponseDTO;
 
 @RestController
@@ -28,7 +32,7 @@ public class UserController{
      * @return User data as UserResponseDTO
      */
     @PostMapping()
-    public ResponseEntity<UserResponseDTO> create(@RequestBody UserCreateRequestDTO request){
+    public ResponseEntity<UserResponseDTO> create(@Valid @RequestBody UserCreateRequestDTO request){
         UserResponseDTO response = new UserResponseDTO(this.service.create(request));
         
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -50,12 +54,16 @@ public class UserController{
     /**
      * Get a list of users
      * 
-     * @param id ID of the user retrieve
+     * @param filters values to filter
      * @return User data as UserResponseDTO
      */
     @GetMapping
-    public ResponseEntity<List<UserResponseDTO>> list(UserFilterRequestDTO filters){
-        return ResponseEntity.ok(this.service.getList(filters));
+    public ResponseEntity<List<UserResponseDTO>> getUsers(UserFilterRequestDTO filters) {
+        
+        List<UserModel> users = service.getList(filters);
+        List<UserResponseDTO> listDTO = users.stream().map(UserResponseDTO::new).toList();
+
+        return ResponseEntity.ok(listDTO);
     }
 
     /**
@@ -66,7 +74,7 @@ public class UserController{
      * @return
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Void> update(@PathVariable Long id, @RequestBody UserUpdateRequestDTO request) {
+    public ResponseEntity<Void> update(@Valid @PathVariable Long id, @RequestBody UserUpdateRequestDTO request) {
         this.service.update(id, request);
 
         return ResponseEntity.noContent().build();

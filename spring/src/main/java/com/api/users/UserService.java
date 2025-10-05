@@ -15,6 +15,7 @@ import jakarta.transaction.Transactional;
 
 import com.api.common.BaseService;
 import com.api.enums.EnumCurrency;
+import com.api.enums.EnumUsersType;
 import com.api.users.dto.UserCreateRequestDTO;
 import com.api.users.dto.UserFilterRequestDTO;
 import com.api.users.dto.UserResponseDTO;
@@ -86,58 +87,34 @@ public class UserService extends BaseService<UserModel>{
         repository.delete(this.findOrFail(id));
     }
 
-    /**
-     * Get a list of users with filters
-     * 
-     * @param filters
-     * @return
-     */
-    public List<UserResponseDTO> getList(UserFilterRequestDTO filters) {
+    public List<UserModel> getList(UserFilterRequestDTO filters) {
+        StringBuilder builder = new StringBuilder("SELECT u FROM UserModel u");
+
         List<String> queryFilters = new ArrayList<>();
         Map<String, Object> params = new HashMap<>();
 
-        for (Field field : UserFilterRequestDTO.class.getDeclaredFields()) {
-            Object value;
-            try {
-                value = field.get(filters);
-            } catch (IllegalAccessException e) {
-                continue;
-            }
-
-            if (value != null) {
-                switch (field.getName()) {
-                    case "fullName" -> {
-                        queryFilters.add("u.fullName LIKE :fullName");
-                        params.put("fullName", "%" + value + "%");
-                    }
-                    case "email" -> {
-                        queryFilters.add("u.email LIKE :email");
-                        params.put("email", "%" + value + "%");
-                    }
-                    case "type" -> {
-                        queryFilters.add("u.enumUsersType = :type");
-                        params.put("type", value); // equality para enum
-                    }
-                    case "taxId" -> {
-                        queryFilters.add("u.taxId LIKE :taxId");
-                        params.put("taxId", "%" + value + "%");
-                    }
-                }
-            }
+        if (filters.getFullName() != null) {
+            queryFilters.add("u.fullName LIKE :fullName");
+            params.put("fullName", "%" + filters.getFullName() + "%");
         }
-
-        StringBuilder builder = new StringBuilder(
-            "SELECT new com.api.users.dto.UserResponseDTO(u.id, u.fullName, u.email, u.taxId, u.enumUsersType) FROM UserModel u"
-        );
+        if (filters.getEmail() != null) {
+            queryFilters.add("u.email LIKE :email");
+            params.put("email", "%" + filters.getEmail() + "%");
+        }
+        if (filters.getType() != null) {
+            queryFilters.add("u.enumUsersType = :type");
+            params.put("type", EnumUsersType.valueOf(filters.getType()));
+        }
+        if (filters.getTaxId() != null) {
+            queryFilters.add("u.taxId LIKE :taxId");
+            params.put("taxId", "%" + filters.getTaxId() + "%");
+        }
 
         if (!queryFilters.isEmpty()) {
             builder.append(" WHERE ").append(String.join(" AND ", queryFilters));
         }
 
-        TypedQuery<UserResponseDTO> query = this.entityManager.createQuery(
-            builder.toString(), UserResponseDTO.class
-        );
-
+        TypedQuery<UserModel> query = entityManager.createQuery(builder.toString(), UserModel.class);
         params.forEach(query::setParameter);
 
         return query.getResultList();

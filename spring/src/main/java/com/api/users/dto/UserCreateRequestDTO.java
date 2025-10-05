@@ -1,5 +1,8 @@
 package com.api.users.dto;
 
+import com.api.enums.EnumUsersType;
+import com.api.validations.CheckEnum;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -25,6 +28,6 @@ public class UserCreateRequestDTO {
     @Size(min = 6, message = "A senha deve conter no mínimo 6 caracteres")
     private String password;
 
-    @NotBlank(message = "Tipo de usuário é obrigatório")
+    @CheckEnum(enumClass = EnumUsersType.class, message = "Tipo de usuário inválido")
     private String type;
 }
