@@ -23,7 +23,8 @@ public class WalletController{
      */
     @GetMapping("/{id}")
     public ResponseEntity<WalletResponseDTO> get(@PathVariable Long id){
-        return ResponseEntity.ok(this.service.get(id));
+        var response = new WalletResponseDTO(this.service.findOrFail(id));
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -34,6 +35,7 @@ public class WalletController{
      */
     @GetMapping("/user/{userId}")
     public ResponseEntity<WalletResponseDTO> getByUser(@PathVariable Long userId){
-        return ResponseEntity.ok(this.service.findByUserId(userId));
+        var response = new WalletResponseDTO(this.service.findPrimaryByUserId(userId));
+        return ResponseEntity.ok(response);
     }
 }

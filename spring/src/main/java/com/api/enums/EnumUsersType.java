@@ -1,12 +1,15 @@
 package com.api.enums;
 
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
 public enum EnumUsersType {
-    MERCHANT("merchant"),
-    CUSTOMER("customer");
+    MERCHANT("Merchant"),
+    CUSTOMER("Customer");
 
-    private final String value;
+    private final String displayName;
 
-    EnumUsersType(String value){
-        this.value = value;
+    public String getDisplayName() {
+        return displayName;
     }
 }

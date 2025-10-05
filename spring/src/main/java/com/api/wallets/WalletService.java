@@ -1,11 +1,11 @@
 package com.api.wallets;
 
+import java.math.BigDecimal;
+
 import org.springframework.stereotype.Service;
 
 import com.api.common.BaseService;
-import com.api.wallets.dto.WalletCreateRequestDTO;
-import com.api.wallets.dto.WalletResponseDTO;
-
+import com.api.wallets.dto.WalletCreateDTO;
 
 @Service
 public class WalletService extends BaseService<WalletModel>{
@@ -23,20 +23,9 @@ public class WalletService extends BaseService<WalletModel>{
      * @param walletDTO
      * @return WalletResponseDTO
      */
-    public WalletResponseDTO create(WalletCreateRequestDTO walletDTO){ 
+    public WalletModel create(WalletCreateDTO walletDTO){ 
         WalletModel wallet = new WalletModel(walletDTO);
-        this.repository.save(wallet);
-        return new WalletResponseDTO(wallet);
-    }
-
-    /**
-     * Get a wallet by id
-     * 
-     * @param id
-     * @return WalletResponseDTO
-     */
-    public WalletResponseDTO get(Long id){ 
-        return new WalletResponseDTO(this.findOrFail(id));
+        return this.repository.save(wallet);
     }
 
     /**
@@ -46,17 +35,16 @@ public class WalletService extends BaseService<WalletModel>{
      * @param amount
      * @return
      */
-    public WalletResponseDTO deposit(Long id, Double amount){ 
-        if (amount < 1) {
+    public WalletModel deposit(Long id, BigDecimal amount){ 
+        if (amount.compareTo(BigDecimal.valueOf(0.1)) < 0) {
             throw new IllegalArgumentException("O valor deve ser maior que 0");
         } 
 
         var wallet = this.findOrFail(id);
-        Double newBalance = wallet.getBalance() + amount;
+        BigDecimal newBalance = wallet.getBalance().add(amount);
         
         wallet.setBalance(newBalance);
-        repository.save(wallet);
-        return new WalletResponseDTO(wallet);
+        return repository.save(wallet);
     }
 
     /**
@@ -66,25 +54,23 @@ public class WalletService extends BaseService<WalletModel>{
      * @param amount
      * @return
      */
-    public WalletResponseDTO withDraw(Long id, Double amount){
-        if (amount < 1) {
+    public WalletModel withDraw(Long id, BigDecimal amount){
+        if ((amount.compareTo(BigDecimal.valueOf(0.1)) < 0)) {
             throw new IllegalArgumentException("O valor deve ser maior que 0");
         } 
 
         var wallet = this.findOrFail(id);
-        Double newBalance = wallet.getBalance() - amount;
+        BigDecimal newBalance = wallet.getBalance().subtract(amount);
 
-        if(newBalance < 0){
+        if((newBalance.compareTo(BigDecimal.valueOf(0)) < 0)){
             throw new IllegalArgumentException("Saldo insuficiente");
         }
 
         wallet.setBalance(newBalance);
-        repository.save(wallet);
-        return new WalletResponseDTO(wallet);
+        return repository.save(wallet);
     }
 
-    public WalletResponseDTO findByUserId(Long userId){
-        var wallet = this.walletRepository.findFirstByUserId(userId);
-        return new WalletResponseDTO(wallet);
+    public WalletModel findPrimaryByUserId(Long userId){
+        return this.walletRepository.findFirstByUserIdAndIsPrimaryTrue(userId);
     }
 }
