@@ -13,8 +13,11 @@ public enum EnumCurrency {
     private final String displayName;
     private final String symbol;
 
-   @Override
-    public String toString() {
-        return name() + " (" + symbol + ")";
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public String getSymbol() {
+        return symbol;
     }
 }
