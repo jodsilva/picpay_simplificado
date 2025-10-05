@@ -29,8 +29,9 @@ public class UserController{
      */
     @PostMapping()
     public ResponseEntity<UserResponseDTO> create(@RequestBody UserCreateRequestDTO request){
-        UserResponseDTO user = this.service.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+        UserResponseDTO response = new UserResponseDTO(this.service.create(request));
+        
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
@@ -41,7 +42,9 @@ public class UserController{
      */
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> get(@PathVariable Long id){
-        return ResponseEntity.ok(this.service.get(id));
+        UserResponseDTO response = new UserResponseDTO(this.service.findOrFail(id));
+
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -63,8 +66,9 @@ public class UserController{
      * @return
      */
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> update(@PathVariable Long id, @RequestBody UserUpdateRequestDTO request) {
+    public ResponseEntity<Void> update(@PathVariable Long id, @RequestBody UserUpdateRequestDTO request) {
         this.service.update(id, request);
+
         return ResponseEntity.noContent().build();
     }
     
@@ -77,6 +81,7 @@ public class UserController{
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id){
         this.service.delete(id);
+
         return ResponseEntity.noContent().build();
     }
 }

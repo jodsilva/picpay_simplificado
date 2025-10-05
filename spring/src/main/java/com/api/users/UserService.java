@@ -19,7 +19,7 @@ import com.api.users.dto.UserFilterRequestDTO;
 import com.api.users.dto.UserResponseDTO;
 import com.api.users.dto.UserUpdateRequestDTO;
 import com.api.wallets.WalletService;
-import com.api.wallets.dto.WalletCreateRequestDTO;
+import com.api.wallets.dto.WalletCreateDTO;
 
 @Service
 public class UserService extends BaseService<UserModel>{
@@ -47,28 +47,21 @@ public class UserService extends BaseService<UserModel>{
      * @return UserResponseDTO
      */
     @Transactional
-    public UserResponseDTO create(UserCreateRequestDTO userDTO){ 
+    public UserModel create(UserCreateRequestDTO userDTO){ 
+
         UserModel user = new UserModel(userDTO);
         user.setPassword(this.passwordEncoder.encode(userDTO.getPassword()));
 
         this.repository.save(user);
-        this.walletService.create(new WalletCreateRequestDTO(
-            user.getId(), 
+
+        this.walletService.create(new WalletCreateDTO(
+            user, 
             0.0, 
-            EnumCurrency.BRL.name()
+            EnumCurrency.BRL.name(),
+            true
         ));
 
-        return new UserResponseDTO(user);
-    }
-
-    /**
-     * Get a user by id
-     * 
-     * @param id
-     * @return UserResponseDTO
-     */
-    public UserResponseDTO get(Long id){ 
-        return new UserResponseDTO(this.findOrFail(id));
+        return user;
     }
 
     /**
