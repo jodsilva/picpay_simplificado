@@ -17,13 +17,8 @@ import com.api.users.dto.UserCreateRequestDTO;
 import com.api.users.dto.UserFilterRequestDTO;
 import com.api.users.dto.UserResponseDTO;
 import com.api.users.dto.UserUpdateRequestDTO;
-<<<<<<< Updated upstream
-
-import lombok.AllArgsConstructor;
-=======
 import com.api.wallets.WalletService;
 import com.api.wallets.dto.WalletCreateDTO;
->>>>>>> Stashed changes
 
 @Service
 @AllArgsConstructor
@@ -43,28 +38,13 @@ public class UserService {
      * @param userDTO
      * @return UserResponseDTO
      */
-<<<<<<< Updated upstream
-    public UserResponseDTO create(UserCreateRequestDTO userDTO){ 
-=======
+
     @Transactional
     public UserModel create(UserCreateRequestDTO userDTO){ 
->>>>>>> Stashed changes
         UserModel user = new UserModel(userDTO);
         user.setPassword(this.passwordEncoder.encode(userDTO.getPassword()));
         this.repository.save(user);
-<<<<<<< Updated upstream
-        return new UserResponseDTO(user);
-    }
 
-    /**
-     * Get a user by id
-     * 
-     * @param id
-     * @return UserResponseDTO
-     */
-    public UserResponseDTO get(Long id){ 
-        return new UserResponseDTO(this.findUserOrFail(id));
-=======
         this.walletService.create(new WalletCreateDTO(
             user, 
             0.0, 
@@ -73,7 +53,6 @@ public class UserService {
         ));
 
         return user;
->>>>>>> Stashed changes
     }
 
     /**
