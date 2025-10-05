@@ -7,29 +7,37 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Service;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
+import jakarta.transaction.Transactional;
 
+import com.api.common.BaseService;
+import com.api.enums.EnumCurrency;
 import com.api.users.dto.UserCreateRequestDTO;
 import com.api.users.dto.UserFilterRequestDTO;
 import com.api.users.dto.UserResponseDTO;
 import com.api.users.dto.UserUpdateRequestDTO;
-
-import lombok.AllArgsConstructor;
+import com.api.wallets.WalletService;
+import com.api.wallets.dto.WalletCreateRequestDTO;
 
 @Service
-@AllArgsConstructor
-public class UserService {
+public class UserService extends BaseService<UserModel>{
 
-    private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final EntityManager entityManager;
+    private final WalletService walletService;  
 
-    public UserModel findUserOrFail(Long id){
-        return this.repository.findById(id).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+    public UserService(
+        UserRepository repository,
+        PasswordEncoder passwordEncoder,
+        EntityManager entityManager,
+        WalletService walletService
+    ) {
+        super(repository);
+        this.passwordEncoder = passwordEncoder;
+        this.entityManager = entityManager;
+        this.walletService = walletService;
     }
 
     /**
@@ -38,10 +46,18 @@ public class UserService {
      * @param userDTO
      * @return UserResponseDTO
      */
+    @Transactional
     public UserResponseDTO create(UserCreateRequestDTO userDTO){ 
         UserModel user = new UserModel(userDTO);
         user.setPassword(this.passwordEncoder.encode(userDTO.getPassword()));
+
         this.repository.save(user);
+        this.walletService.create(new WalletCreateRequestDTO(
+            user.getId(), 
+            0.0, 
+            EnumCurrency.BRL.name()
+        ));
+
         return new UserResponseDTO(user);
     }
 
@@ -52,7 +68,7 @@ public class UserService {
      * @return UserResponseDTO
      */
     public UserResponseDTO get(Long id){ 
-        return new UserResponseDTO(this.findUserOrFail(id));
+        return new UserResponseDTO(this.findOrFail(id));
     }
 
     /**
@@ -62,7 +78,7 @@ public class UserService {
      * @return UserResponseDTO
      */
     public UserResponseDTO update(Long id, UserUpdateRequestDTO userDTO){ 
-        var user = this.findUserOrFail(id);
+        var user = this.findOrFail(id);
         user.applyUpdateDTO(userDTO);
         this.repository.save(user);
         return new UserResponseDTO(user);
@@ -73,7 +89,7 @@ public class UserService {
      * @param id
      */
     public void delete(Long id){
-        repository.delete(this.findUserOrFail(id));
+        repository.delete(this.findOrFail(id));
     }
 
     /**
