@@ -1,25 +1,35 @@
 package com.api.transactions;
 
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.api.common.BaseService;
 import com.api.enums.EnumTransactionsType;
+import com.api.enums.EnumUsersType;
 import com.api.transactions.dto.TransactionCreateDTO;
 import com.api.transactions.dto.TransactionDepositRequestDTO;
 import com.api.transactions.dto.TransactionTransferRequestDTO;
 import com.api.wallets.WalletService;
-
 import jakarta.transaction.Transactional;
-
 
 @Service
 public class TransactionService extends BaseService<TransactionModel>{
 
-    private final WalletService walletService;
+    private final WalletService walletService; 
+    private final WebClient webClient;
 
-    public TransactionService(TransactionRepository repository, WalletService walletService){
+    public TransactionService(
+        TransactionRepository repository, 
+        WalletService walletService,
+        WebClient webClient
+    ){
         super(repository);
         this.walletService = walletService;
+        this.webClient = webClient;
     }
 
     /**
@@ -40,9 +50,19 @@ public class TransactionService extends BaseService<TransactionModel>{
      * @param id
      * @return TransactionResponseDTO
      */
+    @Transactional
     public TransactionModel transfer(TransactionTransferRequestDTO transferDTO){ 
+        this.checkTransferAuthorization();
+
         var payerWallet = walletService.findOrFail(transferDTO.getPayerWalletId());
         var payeeWallet = walletService.findPrimaryByUserId(transferDTO.getPayee());
+
+        if(
+            payerWallet.getUser().getEnumUsersType() == EnumUsersType.MERCHANT ||
+            payerWallet.getId().equals(payeeWallet.getId())
+        ){
+             throw new IllegalArgumentException("Sem permissão para realizar a transferência");
+        }
 
         this.walletService.withDraw(payerWallet.getId(), transferDTO.getAmount());
         this.walletService.deposit(payeeWallet.getId(), transferDTO.getAmount());
@@ -58,12 +78,32 @@ public class TransactionService extends BaseService<TransactionModel>{
         return this.create(createDTO);
     }
 
+    @SuppressWarnings("unchecked")
+    public void checkTransferAuthorization() {
+        Map<String, Object> response = webClient.get()
+                .uri("util.devi.tools/api/v2/authorize")
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block();
+
+        if (response == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Transferência não autorizada");
+        }
+
+        Map<String, Object> data = (Map<String, Object>) response.get("data");
+        if (data == null || !Boolean.TRUE.equals(data.get("authorization"))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Transferência não autorizada");
+        }
+    }
+
+
     /**
      * Make a transfer between users 
      * 
      * @param id
      * @return TransactionResponseDTO
      */
+    @Transactional
     public TransactionModel deposit(TransactionDepositRequestDTO depositDTO){ 
         var payeeWallet = walletService.findOrFail(depositDTO.getPayeeWalletId());
 
