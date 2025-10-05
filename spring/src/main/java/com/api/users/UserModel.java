@@ -3,9 +3,11 @@ package com.api.users;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.api.users.dto.UserCreateRequestDTO;
 import com.api.users.dto.UserUpdateRequestDTO;
+import com.api.wallets.WalletModel;
 
 @Entity
 @Table(name = "users")
@@ -35,6 +37,9 @@ public class UserModel {
     private LocalDateTime updatedAt;
     @Column
     private LocalDateTime deletedAt;
+
+    @OneToMany(mappedBy = "user")
+    private List<WalletModel> wallets;
 
     public UserModel(UserCreateRequestDTO userDTO){
         this.fullName = userDTO.getFullName();
