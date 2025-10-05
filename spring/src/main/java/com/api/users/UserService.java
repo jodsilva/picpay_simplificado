@@ -2,6 +2,7 @@ package com.api.users;
 
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +57,7 @@ public class UserService extends BaseService<UserModel>{
 
         this.walletService.create(new WalletCreateDTO(
             user, 
-            0.0, 
+            BigDecimal.valueOf(0.0), 
             EnumCurrency.BRL.name(),
             true
         ));

@@ -6,7 +6,6 @@ import com.api.users.UserModel;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
 @Getter
