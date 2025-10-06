@@ -21,7 +21,7 @@ public class UserResponseDTO {
         this.fullName = user.getFullName();
         this.email = user.getEmail();
         this.taxId = user.getTaxId();
-        this.type = user.getEnumUsersType();
+        this.type = user.getEnumUsersType().name();
     }
 
     public UserResponseDTO(String fullName, String email, String taxId, EnumUsersType enumUsersType) {
