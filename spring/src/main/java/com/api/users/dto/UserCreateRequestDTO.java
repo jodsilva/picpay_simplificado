@@ -25,7 +25,7 @@ public class UserCreateRequestDTO {
 
     @NotBlank(message = "O Cpf/Cnpj é obrigatório")
     @Size(min = 8, message = "O CPF/CNPJ deve ter no mínimo 8 caracteres")
-    @CheckUnique(entityClass = UserModel.class, fieldName = "email", message = "CPF / CNPJ já cadastrado")
+    @CheckUnique(entityClass = UserModel.class, fieldName = "tax_id", message = "CPF / CNPJ já cadastrado")
     private String taxId;
 
     @NotBlank(message = "A senha é obrigatória")
