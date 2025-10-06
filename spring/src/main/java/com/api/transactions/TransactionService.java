@@ -1,5 +1,6 @@
 package com.api.transactions;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -8,6 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.api.common.BaseService;
+import com.api.common.NotificationService;
 import com.api.enums.EnumTransactionsType;
 import com.api.enums.EnumUsersType;
 import com.api.transactions.dto.TransactionCreateDTO;
@@ -21,15 +23,18 @@ public class TransactionService extends BaseService<TransactionModel>{
 
     private final WalletService walletService; 
     private final WebClient webClient;
+    private final NotificationService notificationService;
 
     public TransactionService(
         TransactionRepository repository, 
         WalletService walletService,
-        WebClient webClient
+        WebClient webClient,
+        NotificationService notificationService
     ){
         super(repository);
         this.walletService = walletService;
         this.webClient = webClient;
+        this.notificationService = notificationService;
     }
 
     /**
@@ -74,7 +79,7 @@ public class TransactionService extends BaseService<TransactionModel>{
             EnumTransactionsType.TRANSFER.name(),
             payerWallet.getEnumCurrency().name()
         );
-
+        
         return this.create(createDTO);
     }
 
@@ -118,5 +123,14 @@ public class TransactionService extends BaseService<TransactionModel>{
         );
 
         return this.create(createDTO);
+    }
+
+    public void notifyTransfer(TransactionModel transaction){
+        var payee = transaction.getPayerWallet().getUser();
+        var payer = transaction.getPayeeWallet().getUser();
+        this.notificationService.sendEmail(
+            payee.getEmail(), 
+            payer.getEmail() + "enviou uma transfêrencia no valor de " + transaction.getAmount()
+        );
     }
 }

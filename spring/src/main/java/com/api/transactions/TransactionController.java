@@ -27,7 +27,7 @@ public class TransactionController{
     @PostMapping("/transfer")
     public ResponseEntity<TransactionResponseDTO> transfer(@RequestBody TransactionTransferRequestDTO request){
         var transaction = this.service.transfer(request);
-
+        this.service.notifyTransfer(transaction);
         return ResponseEntity.status(HttpStatus.CREATED).body(new TransactionResponseDTO(
             transaction,
             transaction.getPayerWallet(),

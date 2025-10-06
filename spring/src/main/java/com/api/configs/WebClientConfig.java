@@ -1,4 +1,4 @@
-package com.api.transactions.config;
+package com.api.configs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +9,6 @@ public class WebClientConfig {
 
     @Bean
     public WebClient webClient(WebClient.Builder builder) {
-        return builder.baseUrl("https://").build();
+        return builder.baseUrl("").build();
     }
 }
