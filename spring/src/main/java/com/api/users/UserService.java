@@ -50,7 +50,7 @@ public class UserService extends BaseService<UserModel>{
      */
     @Transactional
     public UserModel create(UserCreateRequestDTO userDTO){ 
-
+        
         UserModel user = new UserModel(userDTO);
         user.setPassword(this.passwordEncoder.encode(userDTO.getPassword()));
 
