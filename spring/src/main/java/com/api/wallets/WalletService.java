@@ -2,7 +2,9 @@ package com.api.wallets;
 
 import java.math.BigDecimal;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.api.common.BaseService;
 import com.api.wallets.dto.WalletCreateDTO;
@@ -37,7 +39,7 @@ public class WalletService extends BaseService<WalletModel>{
      */
     public WalletModel deposit(Long id, BigDecimal amount){ 
         if (amount.compareTo(BigDecimal.valueOf(0.1)) < 0) {
-            throw new IllegalArgumentException("O valor deve ser maior que 0");
+             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"O valor deve ser maior que 0");
         } 
 
         var wallet = this.findOrFail(id);
@@ -56,14 +58,14 @@ public class WalletService extends BaseService<WalletModel>{
      */
     public WalletModel withDraw(Long id, BigDecimal amount){
         if ((amount.compareTo(BigDecimal.valueOf(0.1)) < 0)) {
-            throw new IllegalArgumentException("O valor deve ser maior que 0");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"O valor deve ser maior que 0");
         } 
 
         var wallet = this.findOrFail(id);
         BigDecimal newBalance = wallet.getBalance().subtract(amount);
 
         if((newBalance.compareTo(BigDecimal.valueOf(0)) < 0)){
-            throw new IllegalArgumentException("Saldo insuficiente");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Saldo insuficiente");
         }
 
         wallet.setBalance(newBalance);

@@ -27,7 +27,7 @@ public class UserUpdateRequestDTO {
 
     @NotBlank(message = "O Cpf/Cnpj é obrigatório")
     @Size(min = 11, message = "O CPF/CNPJ deve ter no mínimo 8 caracteres")
-    @CheckUnique(entityClass = UserModel.class, fieldName = "tax_id", message = "CPF / CNPJ já cadastrado")
+    @CheckUnique(entityClass = UserModel.class, fieldName = "taxId", message = "CPF / CNPJ já cadastrado")
     private Optional<String> taxId = Optional.empty();
 
     @CheckEnum(enumClass = EnumUsersType.class, message = "Tipo de usuário inválido")

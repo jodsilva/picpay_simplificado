@@ -1,6 +1,8 @@
 package com.api.common;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 public abstract class BaseService<T> {
     
@@ -11,12 +13,12 @@ public abstract class BaseService<T> {
     }
 
     /**
-     * Find a register
+     * Find a record
      * 
      * @param id
      * @return UserModel
      */
     public T findOrFail(Long id){
-        return this.repository.findById(id).orElseThrow(() -> new RuntimeException("Registro não encontrado"));
+       return this.repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Registro não encontrado"));
     }
 }

@@ -66,7 +66,7 @@ public class TransactionService extends BaseService<TransactionModel>{
             payerWallet.getUser().getEnumUsersType() == EnumUsersType.MERCHANT ||
             payerWallet.getId().equals(payeeWallet.getId())
         ){
-             throw new IllegalArgumentException("Sem permissão para realizar a transferência");
+             throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Sem permissão para realizar a transferência");
         }
 
         this.walletService.withDraw(payerWallet.getId(), transferDTO.getAmount());
