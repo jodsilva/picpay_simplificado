@@ -85,18 +85,23 @@ public class TransactionService extends BaseService<TransactionModel>{
 
     @SuppressWarnings("unchecked")
     public void checkTransferAuthorization() {
-        Map<String, Object> response = webClient.get()
-                .uri("util.devi.tools/api/v2/authorize")
-                .retrieve()
-                .bodyToMono(Map.class)
-                .block();
+        try {
+            Map<String, Object> response = webClient.get()
+                    .uri("http://util.devi.tools/api/v2/authorize")
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
 
-        if (response == null) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Transferência não autorizada");
-        }
+            if (response == null) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Transferência não autorizada");
+            }
 
-        Map<String, Object> data = (Map<String, Object>) response.get("data");
-        if (data == null || !Boolean.TRUE.equals(data.get("authorization"))) {
+            Map<String, Object> data = (Map<String, Object>) response.get("data");
+            if (data == null || !Boolean.TRUE.equals(data.get("authorization"))) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Transferência não autorizada");
+            }
+        } catch (Exception e) {
+            System.out.println("Erro ao verificar autorização: " + e.getMessage());
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Transferência não autorizada");
         }
     }
